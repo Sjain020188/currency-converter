@@ -11,12 +11,12 @@ protocol CurrencyManagerDelegate{
     func didUpdateAmount(_ currencyManager: CurrencyManager,currency: CurrencyData)
 }
 struct CurrencyManager{
-    let currencyUrl = "https://api.exchangeratesapi.io/latest?&base=JPY";
+    let currencyUrl = "https://api.exchangeratesapi.io/latest?&base=";
     let currencyArray = ["AUD", "BRL","CAD","CNY","EUR","GBP","HKD","IDR","ILS","INR","JPY","MXN","NOK","NZD","PLN","RON","RUB","SEK","SGD","USD","ZAR"]
     var delegate:CurrencyManagerDelegate?
     
-    func fetchCurrency(currencySymbol: String){
-        let urlString = "\(currencyUrl)&symbols=\(currencySymbol)"
+    func fetchCurrency(targetCurrencySymbol: String, fromCurrencySymbol: String){
+        let urlString = "\(currencyUrl)\(fromCurrencySymbol)&symbols=\(targetCurrencySymbol)"
         performRequest(urlString: urlString)
     }
     

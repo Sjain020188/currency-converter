@@ -10,15 +10,18 @@ import UIKit
 
 class ViewController: UIViewController, UITextFieldDelegate, CurrencyManagerDelegate, UIPickerViewDataSource, UIPickerViewDelegate {
 
-    
-
-    @IBOutlet weak var CurrencyPicker: UIPickerView!
+    @IBOutlet weak var TargetCurrencyInput: UITextField!
+    @IBOutlet weak var FromCurrencyInput: UITextField!
     @IBOutlet weak var EnteredAmount: UITextField!
     @IBOutlet weak var ConvertedAmount: UILabel!
-    var currencySelected = "AUD"
+    var TargetCurrencyPicker: UIPickerView! = UIPickerView()
+    var FromCurrencyPicker: UIPickerView! = UIPickerView()
+    var fromCurrencySelected = "JPY"
+    var targetCurrencySelected = "AUD"
+    
     @IBAction func ConvertButton(_ sender: Any) {
         if(EnteredAmount.text != ""){
-            currency.fetchCurrency(currencySymbol: currencySelected)
+            currency.fetchCurrency(targetCurrencySymbol: targetCurrencySelected, fromCurrencySymbol: fromCurrencySelected)
         } else {
             EnteredAmount.placeholder = "Please enter some amount"
         }
@@ -29,9 +32,17 @@ class ViewController: UIViewController, UITextFieldDelegate, CurrencyManagerDele
    
     override func viewDidLoad() {
         super.viewDidLoad()
-        CurrencyPicker.dataSource = self;
-        CurrencyPicker.delegate = self;
+        TargetCurrencyInput.delegate = self;
+        TargetCurrencyPicker.dataSource = self;
+        TargetCurrencyPicker.delegate = self;
+        TargetCurrencyPicker.tag = 2;
+     
+        FromCurrencyPicker.dataSource = self;
+        FromCurrencyPicker.delegate = self;
+        FromCurrencyPicker.tag = 1;
         currency.delegate = self;
+        TargetCurrencyInput.inputView = TargetCurrencyPicker;
+        FromCurrencyInput.inputView = FromCurrencyPicker;
     }
     
     func numberOfComponents(in pickerView: UIPickerView) -> Int {
@@ -39,7 +50,6 @@ class ViewController: UIViewController, UITextFieldDelegate, CurrencyManagerDele
     }
     func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int{
         return currency.currencyArray.count
-    
     }
     
     func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
@@ -47,12 +57,19 @@ class ViewController: UIViewController, UITextFieldDelegate, CurrencyManagerDele
     }
     
     func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
-        currencySelected = currency.currencyArray[row];
-        currency.fetchCurrency(currencySymbol: currency.currencyArray[row])
+        if(pickerView.tag == 1){
+            FromCurrencyInput.text = currency.currencyArray[row];
+            fromCurrencySelected = currency.currencyArray[row];
+        }
+        if(pickerView.tag == 2){
+            TargetCurrencyInput.text = currency.currencyArray[row];
+            targetCurrencySelected = currency.currencyArray[row];
+            currency.fetchCurrency(targetCurrencySymbol: currency.currencyArray[row], fromCurrencySymbol: fromCurrencySelected)
+        }
+        
+       
     }
-    
 
-    
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         textField.endEditing(true);
         return true;
@@ -68,17 +85,18 @@ class ViewController: UIViewController, UITextFieldDelegate, CurrencyManagerDele
     }
     
     func textFieldDidEndEditing(_ textField: UITextField) {
-        EnteredAmount.text = ""
+        
     }
     
     func didUpdateAmount(_ currencyManager: CurrencyManager,currency: CurrencyData){
         DispatchQueue.main.async{
             for (_,value) in currency.rates{
-                self.ConvertedAmount.text = "1 JPY = \(String(value)) \(self.currencySelected)"
+                let amount = Float(self.EnteredAmount.text!)
+                self.ConvertedAmount.text = "\(String(self.EnteredAmount.text!)) \(self.fromCurrencySelected) = \(String(value * amount!)) \(self.targetCurrencySelected)"
             }
         }
     }
-
-
+    
+  
 }
-
+ 
