@@ -9,7 +9,10 @@
 import UIKit
 
 class ViewController: UIViewController, UITextFieldDelegate, CurrencyManagerDelegate, UIPickerViewDataSource, UIPickerViewDelegate {
-
+    @IBOutlet weak var TableView: UITableView!
+    @IBOutlet weak var TopView: UIView!
+    @IBOutlet weak var MiddleView: UIView!
+    
     @IBOutlet weak var TargetCurrencyInput: UITextField!
     @IBOutlet weak var FromCurrencyInput: UITextField!
     @IBOutlet weak var EnteredAmount: UITextField!
@@ -25,24 +28,28 @@ class ViewController: UIViewController, UITextFieldDelegate, CurrencyManagerDele
         } else {
             EnteredAmount.placeholder = "Please enter some amount"
         }
-       
+        flip();
+        
     }
     
     var currency = CurrencyManager();
-   
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         TargetCurrencyInput.delegate = self;
         TargetCurrencyPicker.dataSource = self;
         TargetCurrencyPicker.delegate = self;
         TargetCurrencyPicker.tag = 2;
-     
+        
         FromCurrencyPicker.dataSource = self;
         FromCurrencyPicker.delegate = self;
         FromCurrencyPicker.tag = 1;
         currency.delegate = self;
         TargetCurrencyInput.inputView = TargetCurrencyPicker;
         FromCurrencyInput.inputView = FromCurrencyPicker;
+        
+        TableView.register(UINib(nibName: "TableViewCell", bundle: nil), forCellReuseIdentifier: "ReusableCell")
+        TableView.dataSource = self;
     }
     
     func numberOfComponents(in pickerView: UIPickerView) -> Int {
@@ -67,9 +74,9 @@ class ViewController: UIViewController, UITextFieldDelegate, CurrencyManagerDele
             currency.fetchCurrency(targetCurrencySymbol: currency.currencyArray[row], fromCurrencySymbol: fromCurrencySelected)
         }
         
-       
+        
     }
-
+    
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         textField.endEditing(true);
         return true;
@@ -97,6 +104,42 @@ class ViewController: UIViewController, UITextFieldDelegate, CurrencyManagerDele
         }
     }
     
-  
+    @objc func flip() {
+        
+        let xPositionTop = TopView.frame.origin.x
+        let yPositionTop = TopView.frame.origin.y
+        let widthTop = TopView.frame.size.width
+        let heightTop = TopView.frame.size.height
+        
+        let xPositionMiddle = MiddleView.frame.origin.x
+        let yPositionMiddle = MiddleView.frame.origin.y
+        
+        let widthMiddle = TopView.frame.size.width
+        let heightMiddle = TopView.frame.size.height
+        
+        UIView.animate(withDuration: 1.0, animations: {
+            self.TopView.frame = CGRect(x: xPositionMiddle, y: yPositionMiddle, width: widthTop, height: heightTop)
+            self.MiddleView.frame = CGRect(x: xPositionTop, y: yPositionTop, width: widthMiddle, height: heightMiddle)
+        })
+        
+        
+        
+    }
+    
+    
 }
- 
+
+extension ViewController: UITableViewDataSource{
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return 2;
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = TableView.dequeueReusableCell(withIdentifier: "ReusableCell", for: indexPath) as! TableViewCell;
+     
+        return cell;
+    }
+    
+    
+}
+
